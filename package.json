@@ -1,0 +1,22 @@
+{
+  "name": "app-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.11.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marcin209/App-Backend.git"
+  },
+  "author": "msobczak&kgaj",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Marcin209/App-Backend/issues"
+  },
+  "homepage": "https://github.com/Marcin209/App-Backend#readme"
+}
