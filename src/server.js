@@ -5,23 +5,23 @@ var bodyParser = require('body-parser')
 var app = express();
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-    extended: true
-}));
+  extended: true
+})); 
 
 var connection = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
     password : 'qwerty1234',
     database : 'users'
+  });
+  
+connection.connect(function(err) {
+    if (err) {
+        console.error('error connecting: ' + err.stack);
+        return;
+    }
+    console.log('connected as id ' + connection.threadId);
 });
-
-// connection.connect(function(err) {
-//     if (err) {
-//         console.error('error connecting: ' + err.stack);
-//         return;
-//     }
-//     console.log('connected as id ' + connection.threadId);
-// });
 
 
 app.listen(8080, () => console.log('Example app listening on port 8080!'))
@@ -35,13 +35,19 @@ app.get('/login/:ident', function(req,res){
     var query = "SELECT * FROM ?? WHERE login = ?";
     var inserts = ["users", req.params.ident];
     connection.query(query,inserts,function(error,results,fields){
-        var data = {
-            ID: results[0].ID,
-            login: results[0].login
+        if(results == 0){
+            res.sendStatus(404);
         }
-        res.status = 200;
-        res.type('application/json');
-        res.send(data);
+        else{
+            var data = {
+                ID: results[0].ID,
+                login: results[0].login
+            }
+            res.status = 200;
+            res.type('application/json');
+            res.send(data);
+        }
+
     });
 });
 
@@ -63,7 +69,7 @@ app.post('/login', function (req, res) {
                     mode:results[0].TYPE,
                     login: data.login
                 });
-            }
+            }                
             else{//zle pass
                 res.sendStatus(401);
             }
@@ -106,11 +112,12 @@ app.get('/route/:ident',function(req,res){
     });
 });
 
-app.post('/route/:ident',function(req,res){
+app.post('/route',function(req,res){
     var data = req.body;
-    var query = "INSERT INTO ?? (User_ID, Time, Accurancy, Longitude, Latitude) VALUES (?,?,?,?,?)";
-    var inserts = ["locations",data.User_ID,data.Time,data.Accurancy,data.Longitutde,data.Latitude];
+    var query = "INSERT INTO ?? (User_ID, Time, Accuracy, Longitude, Latitude) VALUES (?,?,?,?,?)";
+    var inserts = ["locations",data.userid,data.Time,data.Accuracy,data.Longitude,data.Latitude];
     connection.query(query,inserts,function(error,results,fields){
+        console.log(this.sql);
         res.status = 200;
         res.type("application/json");
         res.send({
@@ -129,16 +136,24 @@ app.get('/alldeliveries', function (req, res) {
 });
 
 app.get('/delivery/:deliveryid', function (req, res) {
-    var query = "SELECT * FROM locations WHERE User_ID = (SELECT User_ID FROM users.deliverypoints where ID=?) ORDER BY locations.Time ASC LIMIT 1";
-    var inserts = ["users", req.params.deliveryid];
+    var query = "SELECT * FROM ?? WHERE User_ID = (SELECT User_ID FROM users.deliverypoints where ID=?) ORDER BY locations.Time ASC LIMIT 1";
+    var inserts = ["locations", req.params.deliveryid];
     connection.query(query,inserts,function(error,results,fields){
         res.send(results);
     });
 });
 
-app.get('/get/:deliveryid', function (req, res) {
-    var query = "SELECT * FROM locations WHERE User_ID = (SELECT User_ID FROM users.deliverypoints where ID=?) ORDER BY locations.Time ASC LIMIT 1";
-    var inserts = ["users", req.params.deliveryid];
+app.get('/getalldeliverypoints/:userid', function (req, res) {
+    var query = "SELECT * FROM ?? where User_ID=?";
+    var inserts = ["deliverypoints", req.params.userid];
+    connection.query(query,inserts,function(error,results,fields){
+        res.send(results);
+    });
+});
+
+app.get('/getallemployees', function (req, res) {
+    var query = "SELECT * FROM ?? where type = 0";
+    var inserts = ["users", req.params.userid];
     connection.query(query,inserts,function(error,results,fields){
         res.send(results);
     });
