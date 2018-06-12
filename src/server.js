@@ -32,6 +32,7 @@ app.get('/', function(req, res){
 });
 
 app.get('/login/:ident', function(req,res){
+    console.log(req.params.ident);
     var query = "SELECT * FROM ?? WHERE login = ?";
     var inserts = ["users", req.params.ident];
     connection.query(query,inserts,function(error,results,fields){
@@ -48,7 +49,6 @@ app.get('/login/:ident', function(req,res){
             res.type('application/json');
             res.send(data);
         }
-
     });
 });
 
@@ -67,7 +67,6 @@ app.post('/login', function (req, res) {
                 delivererID: results[0].User_ID
             });
         });
-
     }
     else{
         console.log(data.login);
@@ -110,10 +109,14 @@ app.get('/route/:ident/deliveryPoints',function(req,res){
 app.get('/route/:ident/deliveryPointsWithAlgorithm',function(req,res){
     var query = "SELECT Longitude,Latitude,Delivered FROM ?? WHERE User_ID = ?";
     var inserts = ["deliverypoints", req.params.ident];
+    var points;
     connection.query(query,inserts,function(error,results,fields){
-        // var points =symulowaneWyzarzanie(results);
-        res.send(results);
-        // console.log(points);
+        points = results;
+        // console.log(results);
+    }).on('end',function(){
+        points = symulowaneWyzarzanie(points);
+        res.send(points);
+        console.log(points);
     });
 });
 
