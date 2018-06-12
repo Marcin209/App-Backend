@@ -179,20 +179,24 @@ app.get('/getAllDeliveryPoints/:userid', function (req, res) {
     });
 });
 
-app.get('/getAllEmployees', function (req, res) {
-    var query = "SELECT * FROM ?? where type = 0";
-    var inserts = ["users", req.params.userid];
+app.get('/userlist', function (req, res) {
+    var query = "SELECT ID from ?? where type = 1";
+    var inserts = ["users"];
+    var result_;
     connection.query(query,inserts,function(error,results,fields){
-        res.send(results);
-    });
-});
+        result_ = results;
+        console.log(results.length);
+    }).on('end',function(){
+        var xxx = [];
+        for(var i = 0; i<result_.length; i++){
+            var query1 = "Select Latitude, Longitude, users.ID, users.login, users.password, users.type from locations left join(users) on (locations.User_ID = users.ID) WHERE User_ID =? ORDER BY locations.Time desc LIMIT 1"
+            var inserts1 = [result_[i].ID];
+            connection.query(query1,inserts1,function(error,results,fields){
+                xxx.push(results[0]);
+            }).on('end',function(){
 
-app.get('/user/:id', function (req, res) {
-    var query = "SELECT * FROM ?? WHERE ID = ?";
-    var inserts = ["users", req.params.id];
-    // query = mysql.format(query,inserts);
-    connection.query(query,inserts,function(error,results,fields){
-        // console.log(this.sql); 
-        res.send(results);
+                if(xxx.length == result_.length) res.send(xxx);
+            });
+        }
     });
 });
