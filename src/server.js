@@ -97,11 +97,11 @@ app.post('/login', function (req, res) {
     }
 });
 
-//dokonczyc funkcja symulownaiewyzarzania
 app.get('/route/:ident/deliveryPoints',function(req,res){
     var query = "SELECT Longitude,Latitude,Delivered,ID FROM ?? WHERE User_ID = ?";
     var inserts = ["deliverypoints", req.params.ident];
     connection.query(query,inserts,function(error,results,fields){
+        // var ids = symulowaneWyzarzanie(results);
         res.send(results);
         console.log(results);
     });
@@ -111,9 +111,9 @@ app.get('/route/:ident/deliveryPointsWithAlgorithm',function(req,res){
     var query = "SELECT Longitude,Latitude,Delivered FROM ?? WHERE User_ID = ?";
     var inserts = ["deliverypoints", req.params.ident];
     connection.query(query,inserts,function(error,results,fields){
-        var points =symulowaneWyzarzanie(results);
-        res.send(points);
-        console.log(points);
+        // var points =symulowaneWyzarzanie(results);
+        res.send(results);
+        // console.log(points);
     });
 });
 
