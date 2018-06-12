@@ -228,7 +228,7 @@ function getDistance(ids) {
 // }
 
 function getRandomInt (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function symulowaneWyzarzanie(ids){
@@ -246,19 +246,19 @@ function symulowaneWyzarzanie(ids){
         var swap1=getRandomInt(0,ids.length);
         var  swap2=swap1;
         while (swap2==swap1 || (swap2==swap2Old && swap1==swap1Old))
-            swap2=getRandomInt(0,ids.length);
+        {   swap2=getRandomInt(0,ids.length );}
         for (var i=0 ; i< ids.length;i++){
             if (i!=swap1 && i!=swap2)
-            { idsNew.push(ids[i]);}
+            { idsNew.push(ids[i]);} }
              if(swap1>swap2){
-                idsNew.push(swap2,ids[swap1]);
-                idsNew.push(swap1,ids[swap2]);
+                idsNew.push(ids[swap1]);
+                idsNew.push(ids[swap2]);
             }
              else {
-                 idsNew.push(swap1, ids[swap2]);
-                 idsNew.push(swap2, ids[swap1]);
+                 idsNew.push(ids[swap2]);
+                 idsNew.push(ids[swap1]);
              }
-        }
+
         var newDistance = getDistance(idsNew);
         var  delta=newDistance-distance;
         if (delta<0){
