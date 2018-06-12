@@ -191,15 +191,14 @@ app.get('/userlist', function (req, res) {
         result_ = results;
         console.log(results.length);
     }).on('end',function(){
-        var xxx = [];
+        var list = [];
         for(var i = 0; i<result_.length; i++){
-            var query1 = "Select Latitude, Longitude, users.ID, users.login, users.password, users.type from locations left join(users) on (locations.User_ID = users.ID) WHERE User_ID =? ORDER BY locations.Time desc LIMIT 1"
+            var query1 = "Select Latitude, Longitude, users.ID, users.login, users.password, users.type from locations left join(users) on (locations.User_ID = users.ID) WHERE User_ID =? ORDER BY locations.Time desc LIMIT 1";
             var inserts1 = [result_[i].ID];
             connection.query(query1,inserts1,function(error,results,fields){
-                xxx.push(results[0]);
+                list.push(results[0]);
             }).on('end',function(){
-
-                if(xxx.length == result_.length) res.send(xxx);
+                if(list.length == result_.length) res.send(list);
             });
         }
     });
