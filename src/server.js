@@ -6,15 +6,15 @@ var app = express();
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
-})); 
+}));
 
 var connection = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
     password : 'qwerty1234',
     database : 'users'
-  });
-  
+});
+
 connection.connect(function(err) {
     if (err) {
         console.error('error connecting: ' + err.stack);
@@ -88,7 +88,7 @@ app.post('/login', function (req, res) {
                     };
                     console.log(cos);
                     res.send(cos);
-                }                
+                }
                 else{//zle pass
                     res.sendStatus(401);
                 }
@@ -111,8 +111,9 @@ app.get('/route/:ident/deliveryPointsWithAlgorithm',function(req,res){
     var query = "SELECT Longitude,Latitude,Delivered FROM ?? WHERE User_ID = ?";
     var inserts = ["deliverypoints", req.params.ident];
     connection.query(query,inserts,function(error,results,fields){
-        res.send(results);
-        console.log(results);
+        var points =symulowaneWyzarzanie(results);
+        res.send(points);
+        console.log(points);
     });
 });
 
@@ -200,3 +201,82 @@ app.get('/userlist', function (req, res) {
         }
     });
 });
+
+
+function getDistance(ids) {
+    var startPoint={"Longitude":17.085052,"Latitude":51.103548};
+    var distance= Math.sqrt(((ids[0]["Longitude"]-startPoint['Longitude'])**2+(ids[0]["Latitude"]-startPoint['Latitude'])**2));
+    var l=ids.length;
+    for (var i=0 ;i<ids.length;i++){
+        if (i<(l-1)){
+            let distanceSmall = Math.sqrt((ids[i]["Longitude"]-ids[i+1]["Longitude"])**2+(ids[i]["Latitude"]-ids[i+1]["Latitude"])**2);
+            distance += distanceSmall;
+        }
+        else{
+            distance += Math.sqrt((ids[i]["Longitude"]-startPoint["Longitude"])**2+(ids[i]["Latitude"]-startPoint["Latitude"])**2)
+        }
+    }
+    return distance;
+}
+//
+// function dict_factory(cursor, row){
+//     var  d = {};
+//     for (idx, col in enumerate(cursor.description)){
+//         d[col[0]] = row[idx];
+//     }
+//     return d;
+// }
+
+function getRandomInt (min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function symulowaneWyzarzanie(ids){
+    var T=1000000;
+    var distance = getDistance(ids);
+    var  bestRoute = ids;
+    var  bestDistance = distance;
+    console.log("\n\nbefore algorithm:\n", ids, "\ndistance before: ", distance, "\n");
+    var  swap2Old=0;
+    var  swap1Old=0;
+    var  powtorzenia=0;
+    while (T>0.001){
+        powtorzenia+=1;
+        var  idsNew=[];
+        var swap1=getRandomInt(0,ids.length);
+        var  swap2=swap1;
+        while (swap2==swap1 || (swap2==swap2Old && swap1==swap1Old))
+            swap2=getRandomInt(0,ids.length);
+        for (var i=0 ; i< ids.length;i++){
+            if (i!=swap1 && i!=swap2)
+            { idsNew.push(ids[i]);}
+             if(swap1>swap2){
+                idsNew.push(swap2,ids[swap1]);
+                idsNew.push(swap1,ids[swap2]);
+            }
+             else {
+                 idsNew.push(swap1, ids[swap2]);
+                 idsNew.push(swap2, ids[swap1]);
+             }
+        }
+        var newDistance = getDistance(idsNew);
+        var  delta=newDistance-distance;
+        if (delta<0){
+            ids=idsNew;
+            if (newDistance<bestDistance){
+                bestDistance=newDistance;
+                bestRoute=ids
+            }
+        }
+        else{
+           var x=Math.random();
+            if (x<Math.exp(-delta/T))
+                ids=idsNew;
+        }
+        swap2Old=swap2;
+        swap1Old=swap1;
+        T=T*0.999;
+    }
+    console.log("after algorithm: distance: \n", bestRoute, "\ndistance: ", getDistance(bestRoute), "\n\npowtorzylem kod ",powtorzenia,"razy\n");
+    return bestRoute;
+}
